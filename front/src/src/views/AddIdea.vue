@@ -9,7 +9,7 @@
       }
     },
     created () {
-      var ideaTitle = prompt('Enter idea title:')
+      var ideaTitle = prompt('Enter a new idea title:')
       if (ideaTitle.length === 0) {
         this.$router.go(-1)
         return
@@ -20,7 +20,7 @@
         .get(link, params)
         .then(response => {
           console.log(response)
-          this.$router.push({ path: '/edit' + response.data.response.path, query: { response: JSON.stringify(response.data.response) } })
+          this.$router.replace({ path: '/edit' + response.data.response.path, query: { response: JSON.stringify(response.data.response) } })
         })
         .catch(err => {
           console.log(err)

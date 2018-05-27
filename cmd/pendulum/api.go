@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"encoding/json"
+	"github.com/titpetric/pendulum/cmd/agilemarkdown"
 	"io/ioutil"
 	"net/http"
 )
@@ -133,10 +134,7 @@ func (api *API) Store(filePath, contents string) (StoreResponse, error) {
 	if err != nil {
 		return response, err
 	}
-	git := Git{
-		Filename: fullPath,
-	}
-	response.Log, err = git.Commit()
+	response.Log, err = agilemarkdown.Sync(api.Path)
 	return response, err
 }
 
