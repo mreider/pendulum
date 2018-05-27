@@ -64,16 +64,16 @@ export default {
   },
   beforeRouteLeave (to, from, next) {
     if (to.meta.componentName === 'Edit') {
-      this.loadContents(to.path, next)
+      this.loadContents(to.path, null, next)
     } else {
       next()
     }
   },
   beforeRouteUpdate (to, from, next) {
-    this.loadContents(to.path, next)
+    this.loadContents(to.path, null, next)
   },
   created () {
-    this.loadContents(this.$route.path)
+    this.loadContents(this.$route.path, this.$route.query.response)
   },
   methods: {
     update (e) {
@@ -143,9 +143,15 @@ export default {
           }
         })
     },
-    loadContents (path, callback) {
+    loadContents (path, response, callback) {
       this.path = path
       this.errors = []
+
+      if (response != null) {
+        this.file = JSON.parse(response)
+        return
+      }
+
       var params = {}
       var link = '/api/read' + path.replace('edit/', '')
       return axios

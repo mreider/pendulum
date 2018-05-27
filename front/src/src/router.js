@@ -7,6 +7,7 @@ export default new VueRouter({
   mode: 'history',
   routes: [
     route('/edit/*', 'Edit'),
+    route('/addIdea', 'AddIdea'),
     route('*', 'Index')
   ]
 })
