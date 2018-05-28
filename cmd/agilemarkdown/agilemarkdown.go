@@ -29,7 +29,7 @@ func AddStory(contentDirectory, projectName, storyTitle string) (storyPath strin
 }
 
 func Sync(contentDirectory string) (string, error) {
-	args := []string{"sync", "--test"}
+	args := []string{"sync"}
 	out, err := runAgileMarkdownCommand(contentDirectory, args)
 	return strings.Join(out, "\n"), err
 }
