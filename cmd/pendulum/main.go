@@ -94,12 +94,18 @@ func main() {
 		assetPrefix,
 	}
 
-	// Set absolute path to contents folder
-	cwd, _ := os.Getwd()
-	api := &API{
-		Path: path.Join(cwd, *contents),
+	var apiPath string
+	if !strings.HasPrefix(*contents, string(os.PathSeparator)) {
+		// Set absolute path to contents folder
+		cwd, _ := os.Getwd()
+		apiPath = path.Join(cwd, *contents)
+	} else {
+		apiPath = *contents
 	}
-	api.Contents = func (w http.ResponseWriter, r *http.Request) {
+	api := &API{
+		Path: apiPath,
+	}
+	api.Contents = func(w http.ResponseWriter, r *http.Request) {
 		http.StripPrefix("/contents/", serveContents(api.Path)).ServeHTTP(w, r)
 	}
 	api.Assets = serveIndex(http.FileServer(&assets), assets)
