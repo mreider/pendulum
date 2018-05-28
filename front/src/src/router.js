@@ -8,6 +8,7 @@ export default new VueRouter({
   routes: [
     route('/edit/*', 'Edit'),
     route('/addIdea', 'AddIdea'),
+    route('/addStory/*', 'AddStory'),
     route('*', 'Index')
   ]
 })

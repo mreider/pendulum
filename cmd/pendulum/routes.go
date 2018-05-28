@@ -23,8 +23,9 @@ func MountRoutes(r chi.Router, api *API) {
 		// List all jobs
 		r.Get("/list/*", api.ListHandler)
 		r.Get("/read/*", api.ReadHandler)
-		r.Get("/addIdea", api.AddIdeaHandler)
 		r.Post("/store/*", api.StoreHandler)
+		r.Get("/addIdea", api.AddIdeaHandler)
+		r.Get("/addStory", api.AddStoryHandler)
 	})
 
 	// read from local storage

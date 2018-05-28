@@ -54,7 +54,7 @@ func (api *API) StoreHandler(w http.ResponseWriter, r *http.Request) {
 
 func (api *API) AddIdeaHandler(w http.ResponseWriter, r *http.Request) {
 	var err error
-	ideaTitle := r.FormValue("idea")
+	ideaTitle := r.FormValue("title")
 
 	ideaPath, ideaContent, err := agilemarkdown.AddIdea(api.Path, ideaTitle)
 	if err != nil {
@@ -68,6 +68,32 @@ func (api *API) AddIdeaHandler(w http.ResponseWriter, r *http.Request) {
 	response.Response, err = api.Read(ideaPath)
 	if response.Response.Contents == "" {
 		response.Response.Contents = ideaContent
+	}
+
+	if err != nil {
+		api.ServeJSON(w, r, api.Error(err))
+		return
+	}
+	api.ServeJSON(w, r, response)
+}
+
+func (api *API) AddStoryHandler(w http.ResponseWriter, r *http.Request) {
+	var err error
+	storyTitle := r.FormValue("title")
+	project := r.FormValue("project")
+
+	storyPath, storyContent, err := agilemarkdown.AddStory(api.Path, project, storyTitle)
+	if err != nil {
+		api.ServeJSON(w, r, api.Error(err))
+		return
+	}
+
+	response := struct {
+		Response ReadResponse `json:"response"`
+	}{}
+	response.Response, err = api.Read(storyPath)
+	if response.Response.Contents == "" {
+		response.Response.Contents = storyContent
 	}
 
 	if err != nil {

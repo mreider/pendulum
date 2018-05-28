@@ -9,12 +9,15 @@
       }
     },
     created () {
-      var ideaTitle = prompt('Enter a new idea title:')
-      if (ideaTitle.length === 0) {
+      var parts = this.$route.path.split('/')
+      var project = parts[2].replace('.md', '')
+
+      var storyTitle = prompt('Enter a new story title:')
+      if (storyTitle == null | storyTitle.length === 0) {
         this.$router.go(-1)
         return
       }
-      var link = '/api/addIdea?title=' + encodeURIComponent(ideaTitle)
+      var link = '/api/addStory?title=' + encodeURIComponent(storyTitle) + '&project=' + encodeURIComponent(project)
       var params = {}
       return axios
         .get(link, params)

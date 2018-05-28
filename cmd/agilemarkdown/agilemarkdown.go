@@ -18,6 +18,16 @@ func AddIdea(contentDirectory, ideaTitle string) (ideaPath string, ideaContent s
 	return ideaPath, ideaContent, err
 }
 
+func AddStory(contentDirectory, projectName, storyTitle string) (storyPath string, storyContent string, err error) {
+	args := []string{"create-item", "--simulate", storyTitle}
+	out, err := runAgileMarkdownCommand(filepath.Join(contentDirectory, projectName), args)
+	if len(out) > 0 {
+		storyPath = out[0]
+		storyContent = strings.Join(out[1:], "\n") + "\n"
+	}
+	return storyPath, storyContent, err
+}
+
 func Sync(contentDirectory string) (string, error) {
 	args := []string{"sync", "--test"}
 	out, err := runAgileMarkdownCommand(contentDirectory, args)
