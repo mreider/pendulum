@@ -36,7 +36,11 @@ func Sync(contentDirectory string) (string, error) {
 
 func runAgileMarkdownCommand(workDir string, args []string) ([]string, error) {
 	absProgramPath, _ := filepath.Abs(os.Args[0])
-	cmd := exec.Command(filepath.Join(filepath.Dir(absProgramPath), "agilemarkdown"), args...)
+	agilemarkdownPath := filepath.Join(filepath.Dir(absProgramPath), "agilemarkdown")
+	if _, err := os.Stat(agilemarkdownPath); err != nil {
+		agilemarkdownPath = "agilemarkdown"
+	}
+	cmd := exec.Command(agilemarkdownPath, args...)
 	var out bytes.Buffer
 	var stderr bytes.Buffer
 	cmd.Stdout = &out
