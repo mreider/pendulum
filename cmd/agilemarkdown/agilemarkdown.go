@@ -2,14 +2,21 @@ package agilemarkdown
 
 import (
 	"bytes"
+	"github.com/dgrijalva/jwt-go"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 )
 
-func AddIdea(contentDirectory, ideaTitle string) (ideaPath string, ideaContent string, err error) {
-	args := []string{"create-idea", "--simulate", ideaTitle}
+func AddIdea(contentDirectory, ideaTitle string, jwtToken string) (ideaPath string, ideaContent string, err error) {
+	user := getUserFromJwtToken(jwtToken)
+
+	args := []string{"create-idea", "--simulate"}
+	if user != "" {
+		args = append(args, "--user", user)
+	}
+	args = append(args, ideaTitle)
 	out, err := runAgileMarkdownCommand(contentDirectory, args)
 	if len(out) > 0 {
 		ideaPath = out[0]
@@ -18,8 +25,14 @@ func AddIdea(contentDirectory, ideaTitle string) (ideaPath string, ideaContent s
 	return ideaPath, ideaContent, err
 }
 
-func AddStory(contentDirectory, projectName, storyTitle string) (storyPath string, storyContent string, err error) {
-	args := []string{"create-item", "--simulate", storyTitle}
+func AddStory(contentDirectory, projectName, storyTitle string, jwtToken string) (storyPath string, storyContent string, err error) {
+	user := getUserFromJwtToken(jwtToken)
+
+	args := []string{"create-item", "--simulate"}
+	if user != "" {
+		args = append(args, "--user", user)
+	}
+	args = append(args, storyTitle)
 	out, err := runAgileMarkdownCommand(filepath.Join(contentDirectory, projectName), args)
 	if len(out) > 0 {
 		storyPath = out[0]
@@ -55,4 +68,28 @@ func runAgileMarkdownCommand(workDir string, args []string) ([]string, error) {
 		lines = append(lines, stderr.String())
 	}
 	return strings.Split(strings.Join(lines, "\n"), "\n"), err
+}
+
+func getUserFromJwtToken(jwtToken string) string {
+	token, _ := jwt.Parse(jwtToken, nil)
+	if token == nil {
+		return ""
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		if name, ok := claims["name"]; ok {
+			user := name.(string)
+			if user != "" {
+				return user
+			}
+		}
+
+		if sub, ok := claims["sub"]; ok {
+			user := sub.(string)
+			if user != "" {
+				return user
+			}
+		}
+	}
+	return ""
 }

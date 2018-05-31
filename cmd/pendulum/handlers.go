@@ -55,8 +55,13 @@ func (api *API) StoreHandler(w http.ResponseWriter, r *http.Request) {
 func (api *API) AddIdeaHandler(w http.ResponseWriter, r *http.Request) {
 	var err error
 	ideaTitle := r.FormValue("title")
+	jwtTokenCookie, err := r.Cookie("jwt_token")
+	var jwtToken string
+	if err == nil && jwtTokenCookie != nil {
+		jwtToken = jwtTokenCookie.Value
+	}
 
-	ideaPath, ideaContent, err := agilemarkdown.AddIdea(api.Path, ideaTitle)
+	ideaPath, ideaContent, err := agilemarkdown.AddIdea(api.Path, ideaTitle, jwtToken)
 	if err != nil {
 		api.ServeJSON(w, r, api.Error(err))
 		return
@@ -81,8 +86,13 @@ func (api *API) AddStoryHandler(w http.ResponseWriter, r *http.Request) {
 	var err error
 	storyTitle := r.FormValue("title")
 	project := r.FormValue("project")
+	jwtTokenCookie, err := r.Cookie("jwt_token")
+	var jwtToken string
+	if err == nil && jwtTokenCookie != nil {
+		jwtToken = jwtTokenCookie.Value
+	}
 
-	storyPath, storyContent, err := agilemarkdown.AddStory(api.Path, project, storyTitle)
+	storyPath, storyContent, err := agilemarkdown.AddStory(api.Path, project, storyTitle, jwtToken)
 	if err != nil {
 		api.ServeJSON(w, r, api.Error(err))
 		return
