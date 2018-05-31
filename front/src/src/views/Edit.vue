@@ -7,7 +7,7 @@
 					<logo></logo> <b class="legend">{{ file.path }}</b>
 					<div class="actions">
 						<span class="badge badge-success" v-for="state in states">{{state.message}}</span>
-						<button @click="save" class="btn btn-primary btn-sm">Save</button>
+						<button @click="save" :disabled="saving" class="btn btn-primary btn-sm">{{saving ? 'Saving' : 'Save'}}</button>
 						<button @click="back" class="btn btn-secondary btn-sm">Close</button>
 					</div>
 				</div>
@@ -50,7 +50,8 @@ export default {
       errors: [],
       states: [],
       cancelScroll: false,
-      saved: true
+      saved: true,
+      saving: false
     }
   },
   components: {
@@ -115,12 +116,14 @@ export default {
       this.path = path
       this.errors = []
       this.states = []
+      this.saving = true
       var params = new FormData()
       params.append('contents', this.file.contents)
       var link = '/api/store' + path.replace('edit/', '')
       return axios
         .post(link, params)
         .then(response => {
+          this.saving = false
           if ('error' in response.data) {
             this.errors = [ response.data.error ]
           } else {
@@ -135,6 +138,7 @@ export default {
           }
         })
         .catch(err => {
+          this.saving = false
           this.errors = [
             { message: err }
           ]
