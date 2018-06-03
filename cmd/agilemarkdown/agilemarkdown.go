@@ -7,7 +7,10 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 )
+
+var syncMutex sync.Mutex
 
 func AddIdea(contentDirectory, ideaTitle string, jwtToken string) (ideaPath string, ideaContent string, err error) {
 	user := getUserFromJwtToken(jwtToken)
@@ -42,6 +45,9 @@ func AddStory(contentDirectory, projectName, storyTitle string, jwtToken string)
 }
 
 func Sync(contentDirectory string) (string, error) {
+	syncMutex.Lock()
+	defer syncMutex.Unlock()
+
 	args := []string{"sync"}
 	out, err := runAgileMarkdownCommand(contentDirectory, args)
 	return strings.Join(out, "\n"), err
