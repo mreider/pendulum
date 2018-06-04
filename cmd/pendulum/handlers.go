@@ -45,11 +45,16 @@ func (api *API) ReadHandler(w http.ResponseWriter, r *http.Request) {
 
 func (api *API) StoreHandler(w http.ResponseWriter, r *http.Request) {
 	var err error
+	jwtTokenCookie, err := r.Cookie("jwt_token")
+	var jwtToken string
+	if err == nil && jwtTokenCookie != nil {
+		jwtToken = jwtTokenCookie.Value
+	}
 
 	response := struct {
 		Response StoreResponse `json:"response"`
 	}{}
-	response.Response, err = api.Store(strings.Replace(r.URL.Path, "/api/store", "", 1), r.PostFormValue("contents"))
+	response.Response, err = api.Store(strings.Replace(r.URL.Path, "/api/store", "", 1), r.PostFormValue("contents"), jwtToken)
 
 	if err != nil {
 		api.ServeJSON(w, r, api.Error(err))

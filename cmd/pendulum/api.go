@@ -125,7 +125,7 @@ func (api *API) Read(filePath string) (ReadResponse, error) {
 	return response, nil
 }
 
-func (api *API) Store(filePath, contents string) (StoreResponse, error) {
+func (api *API) Store(filePath, contents, jwtToken string) (StoreResponse, error) {
 	response := StoreResponse{
 		Status: "OK",
 	}
@@ -134,7 +134,7 @@ func (api *API) Store(filePath, contents string) (StoreResponse, error) {
 	if err != nil {
 		return response, err
 	}
-	response.Log, err = agilemarkdown.Sync(api.Path)
+	response.Log, err = agilemarkdown.Sync(api.Path, jwtToken)
 	return response, err
 }
 

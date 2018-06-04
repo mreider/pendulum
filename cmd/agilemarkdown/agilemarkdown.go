@@ -45,11 +45,18 @@ func AddStory(contentDirectory, projectName, storyTitle string, jwtToken string)
 	return storyPath, storyContent, err
 }
 
-func Sync(contentDirectory string) (string, error) {
+func Sync(contentDirectory, jwtToken string) (string, error) {
 	syncMutex.Lock()
 	defer syncMutex.Unlock()
 
+	userName, userEmail := getUserInfoFromJwtToken(contentDirectory, jwtToken)
+
 	args := []string{"sync"}
+	if userName != "" {
+		userEmail = getUserEmail(userName, userEmail)
+		args = append(args, "--author", fmt.Sprintf("%s <%s>", userName, userEmail))
+
+	}
 	out, err := runAgileMarkdownCommand(contentDirectory, args)
 	return strings.Join(out, "\n"), err
 }
@@ -111,7 +118,7 @@ func getUserInfoFromJwtToken(workDir, jwtToken string) (name, email string) {
 		}
 
 		if email == "" && name != "" {
-			email = fmt.Sprintf("%s@unknown.com", strings.Replace(name, " ", ".", -1))
+			email = getUserEmail(name, email)
 		}
 
 		if name != "" {
@@ -120,4 +127,11 @@ func getUserInfoFromJwtToken(workDir, jwtToken string) (name, email string) {
 
 		return name, email
 	}
+}
+
+func getUserEmail(name, email string) string {
+	if email != "" {
+		return email
+	}
+	return fmt.Sprintf("%s@unknown.org", strings.Replace(name, " ", ".", -1))
 }
