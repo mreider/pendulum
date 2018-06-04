@@ -2,6 +2,7 @@ package agilemarkdown
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"os"
 	"os/exec"
@@ -13,7 +14,7 @@ import (
 var syncMutex sync.Mutex
 
 func AddIdea(contentDirectory, ideaTitle string, jwtToken string) (ideaPath string, ideaContent string, err error) {
-	user := getUserFromJwtToken(jwtToken)
+	user, _ := getUserInfoFromJwtToken(contentDirectory, jwtToken)
 
 	args := []string{"create-idea", "--simulate"}
 	if user != "" {
@@ -29,7 +30,7 @@ func AddIdea(contentDirectory, ideaTitle string, jwtToken string) (ideaPath stri
 }
 
 func AddStory(contentDirectory, projectName, storyTitle string, jwtToken string) (storyPath string, storyContent string, err error) {
-	user := getUserFromJwtToken(jwtToken)
+	user, _ := getUserInfoFromJwtToken(contentDirectory, jwtToken)
 
 	args := []string{"create-item", "--simulate"}
 	if user != "" {
@@ -51,6 +52,15 @@ func Sync(contentDirectory string) (string, error) {
 	args := []string{"sync"}
 	out, err := runAgileMarkdownCommand(contentDirectory, args)
 	return strings.Join(out, "\n"), err
+}
+
+func CreateUserIfNotExist(workDir, jwtToken string) {
+	getUserInfoFromJwtToken(workDir, jwtToken)
+}
+
+func createUserIfNotExist(workDir, name, email string) {
+	args := []string{"create-user", "--name", name, "--email", email}
+	runAgileMarkdownCommand(workDir, args)
 }
 
 func runAgileMarkdownCommand(workDir string, args []string) ([]string, error) {
@@ -76,26 +86,38 @@ func runAgileMarkdownCommand(workDir string, args []string) ([]string, error) {
 	return strings.Split(strings.Join(lines, "\n"), "\n"), err
 }
 
-func getUserFromJwtToken(jwtToken string) string {
+func getUserInfoFromJwtToken(workDir, jwtToken string) (name, email string) {
 	token, _ := jwt.Parse(jwtToken, nil)
 	if token == nil {
-		return ""
+		return "", ""
 	}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok {
-		if name, ok := claims["name"]; ok {
-			user := name.(string)
-			if user != "" {
-				return user
+	if claims, ok := token.Claims.(jwt.MapClaims); !ok {
+		return "", ""
+	} else {
+
+		var name, email string
+		if rawName, ok := claims["name"]; ok {
+			name = rawName.(string)
+		}
+		if rawEmail, ok := claims["email"]; ok {
+			email = rawEmail.(string)
+		}
+
+		if name == "" {
+			if rawSub, ok := claims["sub"]; ok {
+				name = rawSub.(string)
 			}
 		}
 
-		if sub, ok := claims["sub"]; ok {
-			user := sub.(string)
-			if user != "" {
-				return user
-			}
+		if email == "" && name != "" {
+			email = fmt.Sprintf("%s@unknown.com", strings.Replace(name, " ", ".", -1))
 		}
+
+		if name != "" {
+			createUserIfNotExist(workDir, name, email)
+		}
+
+		return name, email
 	}
-	return ""
 }

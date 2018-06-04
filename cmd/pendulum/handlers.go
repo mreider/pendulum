@@ -24,6 +24,12 @@ func (api *API) ListHandler(w http.ResponseWriter, r *http.Request) {
 
 func (api *API) ReadHandler(w http.ResponseWriter, r *http.Request) {
 	var err error
+	jwtTokenCookie, err := r.Cookie("jwt_token")
+	var jwtToken string
+	if err == nil && jwtTokenCookie != nil {
+		jwtToken = jwtTokenCookie.Value
+	}
+	agilemarkdown.CreateUserIfNotExist(api.Path, jwtToken)
 
 	response := struct {
 		Response ReadResponse `json:"response"`
