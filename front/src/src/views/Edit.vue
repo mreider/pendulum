@@ -132,6 +132,7 @@ export default {
               this.states = []
             }, 5000)
             this.saved = true
+            this.loadContents(this.$route.path, null)
           }
           if (typeof callback === 'function') {
             callback()
