@@ -262,5 +262,10 @@ export default {
 		padding: 0 10px;
 		white-space: nowrap;
 	}
+
+  .alert {
+    white-space: pre;
+    font-size: xx-small;
+  }
 }
 </style>

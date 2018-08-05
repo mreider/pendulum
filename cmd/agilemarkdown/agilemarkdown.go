@@ -90,7 +90,8 @@ func runAgileMarkdownCommand(workDir string, args []string) ([]string, error) {
 	if stderr.Len() > 0 {
 		lines = append(lines, stderr.String())
 	}
-	return strings.Split(strings.Join(lines, "\n"), "\n"), err
+	output := strings.TrimSpace(strings.Join(lines, "\n"))
+	return strings.Split(output, "\n"), createVerboseError(err, output)
 }
 
 func getUserInfoFromJwtToken(workDir, jwtToken string) (name, email string) {
@@ -134,4 +135,16 @@ func getUserEmail(name, email string) string {
 		return email
 	}
 	return fmt.Sprintf("%s@unknown.org", strings.Replace(name, " ", ".", -1))
+}
+
+func createVerboseError(err error, out string) error {
+	if err == nil {
+		return nil
+	}
+
+	if out == "" {
+		return err
+	}
+
+	return fmt.Errorf("%s\n%s", err.Error(), out)
 }
